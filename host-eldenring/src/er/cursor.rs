@@ -170,9 +170,51 @@ pub fn centre_menu_pointer(rect: ([f32; 2], [f32; 2])) {
 }
 
 pub fn poll_mouse() {
-    if CAPTURE.load(Ordering::Relaxed) && super::focused() {
-        let mut p = POINT::default();
-        let _ = unsafe { windows::Win32::UI::WindowsAndMessaging::GetCursorPos(&mut p) };
+    if !CAPTURE.load(Ordering::Relaxed) || !super::focused() {
+        return;
+    }
+
+    let mut p = POINT::default();
+    if unsafe {
+        windows::Win32::UI::WindowsAndMessaging::GetCursorPos(&mut p)
+    }.is_err() {
+        return;
+    }
+
+    // Если штатный перехват установлен, он уже обработал движение.
+    // Не дублируем и движение, полученное через DirectInput.
+    if INNER_ORIGINAL.load(Ordering::Relaxed) != 0 || di_mouse_recent() {
+        return;
+    }
+
+    let Some(c) = window_centre() else {
+        return;
+    };
+
+    let dx = p.x - c.x;
+    let dy = p.y - c.y;
+    if dx == 0 && dy == 0 {
+        return;
+    }
+
+    // При неудачном центрировании не отправляем один сдвиг повторно.
+    if unsafe {
+        windows::Win32::UI::WindowsAndMessaging::SetCursorPos(c.x, c.y)
+    }.is_err() {
+        return;
+    }
+
+    MOUSE_SENT.fetch_add(
+        dx.unsigned_abs() as u64 + dy.unsigned_abs() as u64,
+        Ordering::Relaxed,
+    );
+
+    if MENU_MODE.load(Ordering::Relaxed) {
+        let mut m = MENU_PTR.lock().unwrap_or_else(|e| e.into_inner());
+        m[0] += dx as f32;
+        m[1] += dy as f32;
+    } else {
+        send(IN_MOUSE_MOVE, 0, dx, dy);
     }
 }
 
