@@ -1,0 +1,17 @@
+# decompiled ULTRAKILL and cloned projects: development only, never published
+reference/
+
+# build output
+host-eldenring/target/
+guest-ultrakill/bin/
+guest-ultrakill/obj/
+release/
+test-output/
+
+# the built mod and what it writes while running
+dist/EldenKill/*.dll
+dist/EldenKill/*.dll.old*
+dist/EldenKill/ULTRAKILL-plugin/
+dist/EldenKill/mods/
+dist/EldenKill/*.log
+dist/EldenKill/debug-*.txt

@@ -1,0 +1,13 @@
+profileVersion = "v1"
+
+[[supports]]
+game = "eldenring"
+
+[[natives]]
+path = "eldenkill.dll"
+
+# "Elden Ring PC Stutter Fix" (Nexus mod 2859): off. It only works with the game started as
+# administrator, which hung Elden Ring at start; eldenkill.dll sets the same high priority itself
+# (high_priority in eldenkill.ini). To use it anyway, remove the # from the two lines below.
+#[[natives]]
+#path = "mods/SetCPUAffinity.dll"

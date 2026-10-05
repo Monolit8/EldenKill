@@ -1,0 +1,44 @@
+[package]
+name = "eldenkill-host"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+
+[lib]
+name = "eldenkill"
+crate-type = ["cdylib", "rlib"]
+
+# A stand-in for Elden Ring: creates the link, sends test collision, prints what ULTRAKILL reports.
+[[bin]]
+name = "fake-host"
+path = "src/bin/fake_host.rs"
+
+[dependencies]
+# pinned to the commit er-mario uses (Elden Ring 2.7.1.0 / 1.16.x)
+eldenring = { git = "https://github.com/vswarte/fromsoftware-rs", rev = "59fbd3b3b7daaf14aca47c9f73530493dba6bc79" }
+fromsoftware-shared = { git = "https://github.com/vswarte/fromsoftware-rs", rev = "59fbd3b3b7daaf14aca47c9f73530493dba6bc79" }
+glam = "0.30"
+ilhook = { version = "2.3.0", features = ["x64"] }
+pelite = "0.10"
+hudhook = "0.9.3"
+windows = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Gdi",
+    "Win32_Security",
+    "Win32_System_LibraryLoader",
+    "Win32_System_Memory",
+    "Win32_System_Threading",
+    "Win32_System_Diagnostics_Debug",
+    "Win32_System_Performance",
+    "Win32_System_SystemInformation",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_UI_WindowsAndMessaging",
+] }
+
+[profile.release]
+panic = "unwind"
+
+# hudhook with its DX12 texture upload fixed (it leaked an upload buffer per frame): vendor/hudhook
+[patch.crates-io]
+hudhook = { path = "vendor/hudhook" }
